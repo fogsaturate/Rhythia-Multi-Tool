@@ -15,7 +15,31 @@ vulnus_map_path = os.path.join(vulnus_path, "Multipole Expansion")
 # lmfao
 
 
-rhym_test_map = RhymParser.RhymDecoder(rhym_map_path)
-vulnus_test_map = VulnusParser.VulnusDecoder(vulnus_map_path)
+rhym_map = RhymParser.RhymDecoder(rhym_map_path)
+vulnus_map = VulnusParser.VulnusDecoder(vulnus_map_path)
+RhymParser.RhymEncoder(
+    vulnus_map.version,
+    vulnus_map.artist,
+    vulnus_map.title,
+    vulnus_map.difficulties,
+    [
+        {
+          'difficulty_name': 'example',
+          'artist': 'exampleartist',
+          'romanized_artist': 'optionalartist',
+          'title': 'exampletitle',
+          'romanized_title': 'optionaltitle',
+          'mappers': ['example mapper 1'],
+          'note_count': 100
+        }
+    ],
+    [
+        {
+            'note_fields': 3,
+            'note_list': [{'x': 0, 'y': 1, 'time': 100},{'x': 1, 'y': -1, 'time': 200}]
+        }
+    ],
+    romanized_artist="Bob"
+)
 
-print(vulnus_test_map.difficulty_data)
+# print(rhym_map.difficulty_objectdata)
