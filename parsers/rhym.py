@@ -27,9 +27,9 @@ class RhymParser:
         if "romanizedTitle" in global_meta_data:
             self.title = global_meta_data['romanizedTitle']
 
-        difficulty = global_meta_data['difficulties']
+        self.difficulties = global_meta_data['difficulties']
 
-        for i in difficulty: # this will be a very big for loop! teehee!
+        for i in self.difficulties: # this will be a very big for loop! teehee!
 
             # diff metadata stuff goes here
 
@@ -38,6 +38,7 @@ class RhymParser:
                 diff_meta_data: dict = json.loads(difficulty_meta.read())
 
             difficulty_metadata_object = {
+                "difficulty_name": diff_meta_data["difficultyName"],
                 "artist": diff_meta_data["artist"],
                 "title": diff_meta_data["title"],
                 "mappers": diff_meta_data["mappers"],
@@ -46,9 +47,9 @@ class RhymParser:
 
             # this is for japanese titles, this checks if it has "romanizedTitle"s
             if "romanizedArtist" in diff_meta_data:
-                difficulty_metadata_object["romanizedArtist"] = diff_meta_data["romanizedArtist"]
+                difficulty_metadata_object["romanized_artist"] = diff_meta_data["romanizedArtist"]
             if "romanizedTitle" in diff_meta_data:
-                difficulty_metadata_object["romanizedTitle"] = diff_meta_data["romanizedTitle"]
+                difficulty_metadata_object["romanized_title"] = diff_meta_data["romanizedTitle"]
 
             self.difficulty_metadata.append(difficulty_metadata_object)
 
