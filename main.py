@@ -51,6 +51,7 @@ RhymParser.RhymEncoder(
     vulnus_map_difficulty_data,
 
     rhym_output_path,
+    export_as_rhym=True,
     music_path=vulnus_map_music_path,
     cover_path=vulnus_map_cover_path
 )
