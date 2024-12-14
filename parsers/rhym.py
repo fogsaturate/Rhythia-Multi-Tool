@@ -84,6 +84,35 @@ class RhymParser:
             self.difficulty_objectdata.append(difficulty_objectdata_object)
 
         return self
+    # encoder = writes
+    # this is for all the required attributes
+    def RhymEncoder(
+        self,
+        version,
+        artist,
+        title,
+        difficulties,
+        difficulty_metadata,
+        # formatted in a dictionary
+        # [{
+        #
+        #   'difficulty_name': 'example',
+        #   'artist': 'exampleartist',
+        #   'romanized_artist': 'optionalartist',
+        #   'title': 'exampletitle',
+        #   'romanized_title': 'optionaltitle',
+        #   'mappers': ['example mapper 1'],
+        #   'note_count': 100
+        # }]
+        difficulty_objectdata,
+        # formatted in another dictionary
+        # [{
+        #
+        #   'note_fields': 3,
+        #   'note_list': [{'x': 0, 'y': 1, 'time': 100},{'x': 1, 'y': -1, 'time': 200}],
+        # }]
+        romanized_artist = None, # optional
+        romanized_title = None # optional
+    ):
+        print(romanized_artist)
 
-    def RhymEncoder(self): # encoder = writes
-        pass
