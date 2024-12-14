@@ -1,3 +1,12 @@
+"""
+I am planning on parsing every last detail
+that basil intended for SSPMv2, including
+every data type, and even custom difficulty
+names. This also includes skipping unnecessary
+errors such as if custom data is filled with
+garbage.
+"""
+
 class SSPMParser:
     def __init__(self):
         self.lastMs = None
