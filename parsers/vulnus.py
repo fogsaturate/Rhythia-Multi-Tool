@@ -54,3 +54,6 @@ class VulnusParser:
             self.difficulty_data.append(difficulty_data_object)
 
         return self
+
+    def VulnusEncoder(self):
+        pass
