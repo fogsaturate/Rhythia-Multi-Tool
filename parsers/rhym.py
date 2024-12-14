@@ -1,6 +1,7 @@
 import json
 import os
 import shutil
+import zipfile
 
 class RhymParser:
     def __init__(self):
@@ -87,6 +88,7 @@ class RhymParser:
             self.difficulty_objectdata.append(difficulty_objectdata_object)
 
         return self
+
     # encoder = writes
     # this is for all the required attributes
     def RhymEncoder(
@@ -100,12 +102,12 @@ class RhymParser:
         # [{
         #
         #   'difficulty_name': 'example',
-        #   'artist': 'exampleartist',
-        #   'romanized_artist': 'optionalartist',
-        #   'title': 'exampletitle',
-        #   'romanized_title': 'optionaltitle',
+        #   'artist': 'optionalartist',
+        #   'romanized_artist': 'optionalromanizedartist',
+        #   'title': 'optionaltitle',
+        #   'romanized_title': 'optionalromanizedtitle',
         #   'mappers': ['example mapper 1'],
-        #   'note_count': 100,
+        #   'note_count': 2,
         #   'note_fields': 3, (how many note properties there are, for example x, y, and time is only 3 properties)
         #   'note_list': [{'x': 0, 'y': 1, 'time': 100},{'x': 1, 'y': -1, 'time': 200}],
         # }]
@@ -117,12 +119,16 @@ class RhymParser:
         cover_path = None # also optional
     ):
 
-        total_mappers_string = ' '.join(mapper
-            for meta in difficulty_data
-            for mapper in meta["mappers"]
-        ) # for loop slop but it works LOL
+        mappersarray = []
 
-        map_output_id = (total_mappers_string + f" {artist} {title}").replace(" ", "_") # this is for the preferred .rhym output id format
+        for metadataindex in difficulty_data:
+            mappersarray += metadataindex["mappers"]
+
+        no_duplicates_mappers = list(dict.fromkeys(mappersarray)) # get rid of duplicates
+
+        total_mappers_string = ' '.join(no_duplicates_mappers) # for loop slop but it works LOL
+
+        map_output_id = (total_mappers_string + f" - {artist} - {title}").replace(" ", "_") # this is for the preferred .rhym output id format
 
         map_output_path = os.path.join(output_path, map_output_id)
 
@@ -221,3 +227,15 @@ class RhymParser:
                 Very cool
                 """
 
+        if export_as_rhym == True:
+            rhym_file_name = f"{map_output_id}.rhym"
+            rhym_output_path = os.path.join(output_path, rhym_file_name)
+            with zipfile.ZipFile(rhym_output_path, 'w') as zip_stream:
+                for root, dirs, files in os.walk(map_output_path):
+                    for file in files:
+                        file_path = os.path.join(root, file)
+                        arcname = os.path.relpath(file_path, map_output_path)
+                        zip_stream.write(file_path, arcname=arcname)
+
+            if os.path.exists(map_output_path):
+                shutil.rmtree(map_output_path)
