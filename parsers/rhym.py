@@ -12,12 +12,18 @@ class RhymParser:
 
         self.difficulty_metadata: list = []
         self.difficulty_objectdata: list = []
-    
+
     def RhymDecoder(self, folder_path: str): # decoder = reads
         metadata_file_path: str = os.path.join(folder_path, "metadata.json")
 
         with open(metadata_file_path, 'r') as global_meta:
             global_meta_data: dict = json.loads(global_meta.read())
+
+        self.version = global_meta_data['version']
+        self.artist = global_meta_data['artist']
+        self.romanized_artist = global_meta_data['romanizedArtist']
+        self.title = global_meta_data['title']
+        self.title = global_meta_data['romanizedTitle']
 
         difficulty = global_meta_data['difficulties']
 
@@ -58,6 +64,7 @@ class RhymParser:
             notes: list = []
 
             current_ms = 0
+
             # # start at 0, up until note_count, increment by 3 note fields (properties)
             for i in range(0, note_count * note_fields, note_fields):
                 time = note_list[i] + current_ms
@@ -65,7 +72,7 @@ class RhymParser:
                 y = note_list[i + 2]
                 notes.append({"x": x, "y": y, "time": time})
                 current_ms = time
-            
+
             difficulty_objectdata_object = {
                 "note_fields": diff_object_data["noteFields"],
                 "note_list": notes
@@ -74,6 +81,6 @@ class RhymParser:
             self.difficulty_objectdata.append(difficulty_objectdata_object)
 
         return self
-            
+
     def RhymEncoder(self): # encoder = writes
         pass
