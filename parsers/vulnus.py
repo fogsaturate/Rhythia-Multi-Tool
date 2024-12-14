@@ -9,7 +9,7 @@ class VulnusParser:
         self.title: str = "Unknown Title"
         self.mappers: list = ["Unknown Mapper"]
         self.difficulties: list = ["official.json"] # auto converted maps are called official
-        self.audiofilename: str = "audio.mp3"
+        self.audio_filename: str = "audio.mp3"
 
         self.difficulty_data: list = [] # there is only one .json for difficulties!
 
@@ -24,7 +24,7 @@ class VulnusParser:
         self.title = vulnus_meta_data["_title"]
         self.mappers = vulnus_meta_data["_mappers"]
         self.difficulties = vulnus_meta_data["_difficulties"]
-        self.audiofilename = vulnus_meta_data["_music"]
+        self.audio_filename = vulnus_meta_data["_music"]
 
         for i in self.difficulties:
 
@@ -34,20 +34,21 @@ class VulnusParser:
                 diff_note_data: dict = json.loads(difficulty_note.read())
 
             note_list = diff_note_data["_notes"]
-
+            note_count = 0
             notes: list = []
 
             for note in note_list:
-                time = int(note["_time"] * 1000)
-                x = note["_x"]
-                y = note["_y"]
-
+                time = round(int(note["_time"] * 1000)) # im rounding because sometimes you get numbers like 56418.9499999283
+                x = round(note["_x"], 3)
+                y = round(note["_y"], 3)
                 notes.append({"x": x, "y": y, "time": time})
+                note_count += 1
 
             difficulty_data_object = {
                 "difficulty_name": diff_note_data["_name"],
                 "approach_distance": diff_note_data["_approachDistance"],
                 "approach_time": diff_note_data["_approachTime"],
+                "note_count": note_count,
                 "note_list": notes
             }
 
