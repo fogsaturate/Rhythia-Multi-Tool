@@ -1,5 +1,6 @@
 import json
 import os
+import shutil
 
 class RhymParser:
     def __init__(self):
@@ -39,15 +40,17 @@ class RhymParser:
 
             difficulty_metadata_object = {
                 "difficulty_name": diff_meta_data["difficultyName"],
-                "artist": diff_meta_data["artist"],
-                "title": diff_meta_data["title"],
                 "mappers": diff_meta_data["mappers"],
                 "note_count": diff_meta_data["noteCount"]
             }
 
-            # this is for japanese titles, this checks if it has "romanizedTitle"s
+            # difficulty song metadata is optional if it has different songs
+            if "artist" in diff_meta_data:
+                difficulty_metadata_object["artist"] = diff_meta_data["artist"]
             if "romanizedArtist" in diff_meta_data:
                 difficulty_metadata_object["romanized_artist"] = diff_meta_data["romanizedArtist"]
+            if "title" in diff_meta_data:
+                difficulty_metadata_object["title"] = diff_meta_data["title"]
             if "romanizedTitle" in diff_meta_data:
                 difficulty_metadata_object["romanized_title"] = diff_meta_data["romanizedTitle"]
 
@@ -88,11 +91,11 @@ class RhymParser:
     # this is for all the required attributes
     def RhymEncoder(
         self,
-        version,
-        artist,
-        title,
-        difficulties,
-        difficulty_metadata,
+        version: int,
+        artist: str,
+        title: str,
+        difficulties: list,
+        difficulty_data: list,
         # formatted in a dictionary
         # [{
         #
@@ -102,17 +105,119 @@ class RhymParser:
         #   'title': 'exampletitle',
         #   'romanized_title': 'optionaltitle',
         #   'mappers': ['example mapper 1'],
-        #   'note_count': 100
-        # }]
-        difficulty_objectdata,
-        # formatted in another dictionary
-        # [{
-        #
-        #   'note_fields': 3,
+        #   'note_count': 100,
+        #   'note_fields': 3, (how many note properties there are, for example x, y, and time is only 3 properties)
         #   'note_list': [{'x': 0, 'y': 1, 'time': 100},{'x': 1, 'y': -1, 'time': 200}],
         # }]
+        output_path: str,
+        export_as_rhym = False, # optional, export as a .rhym zip (for sharing purposes)
         romanized_artist = None, # optional
-        romanized_title = None # optional
+        romanized_title = None, # optional
+        music_path = None, # optional but highly recommended
+        cover_path = None # also optional
     ):
-        print(romanized_artist)
+
+        total_mappers_string = ' '.join(mapper
+            for meta in difficulty_data
+            for mapper in meta["mappers"]
+        ) # for loop slop but it works LOL
+
+        map_output_id = (total_mappers_string + f" {artist} {title}").replace(" ", "_") # this is for the preferred .rhym output id format
+
+        map_output_path = os.path.join(output_path, map_output_id)
+
+        if not os.path.exists(map_output_path):
+            os.makedirs(map_output_path)
+
+        output_metadata = os.path.join(map_output_path, "metadata.json")
+        output_music = os.path.join(map_output_path, "audio.mp3")
+        output_cover = os.path.join(map_output_path, "cover.png")
+
+        global_metadata_dict = {
+            "version": version,
+            "artist": artist,
+            "title": title,
+            "difficulties": difficulties
+        }
+
+        if romanized_artist:
+            global_metadata_dict["romanizedArtist"] = romanized_artist
+        if romanized_title:
+            global_metadata_dict["romanizedTitle"] = romanized_title
+
+        with open(output_metadata, 'w') as global_metadata_file:
+            json.dump(global_metadata_dict, global_metadata_file, indent=4)
+
+        if music_path:
+            shutil.copyfile(music_path, output_music)
+        if cover_path:
+            shutil.copyfile(cover_path, output_cover)
+
+        for i in difficulty_data:
+
+            # difficulty's metadata.json
+
+            current_difficulty_name = i["difficulty_name"]
+            difficulty_name_dir = os.path.join(map_output_path, current_difficulty_name)
+
+            if not os.path.exists(difficulty_name_dir):
+                os.makedirs(difficulty_name_dir)
+
+            difficulty_metadata_dict = {
+                "difficultyName": current_difficulty_name,
+                "mappers": i["mappers"],
+                "noteCount": i["note_count"]
+            }
+
+            difficulty_metadata_path = os.path.join(difficulty_name_dir, "metadata.json")
+
+            with open(difficulty_metadata_path, 'w') as difficulty_metadata_json:
+                json.dump(difficulty_metadata_dict, difficulty_metadata_json, indent=4)
+
+            # time for notes!
+            # difficulty's object.json
+
+            note_list = i["note_list"]
+
+            notes: list = []
+
+            previous_ms: int = 0
+
+            for note in note_list:
+                x = note["x"]
+                y = note["y"]
+                time = note["time"]
+
+                """
+                delta is used to save file space! its basically
+                the value you get when you subtract the current
+                note's time with the last note's time (in ms)
+                """
+
+                delta = time - previous_ms # time - previous ms (first is always 0)
+                previous_ms = time # define previous ms as the time in the actual note index
+
+                notes.extend([delta, x, y])
+
+            difficulty_object_dict = {
+                "noteFields": i["note_fields"],
+                "noteList": notes
+            }
+
+            difficulty_object_path = os.path.join(difficulty_name_dir, "object.json")
+
+            with open(difficulty_object_path, 'w') as difficulty_object_json:
+                json.dump(difficulty_object_dict, difficulty_object_json, separators=(',', ':'))
+                """
+                The separators here in the json.dump gets
+                rid of all the spaces, so you can save
+                more space! for example, without the
+                separators, the noteList would look like
+                [1, 0, 100, 0, -1, 100]
+
+                The separators make it now look like
+                [1,0,100,0,-1,100]
+
+                Very cool
+                """
 
