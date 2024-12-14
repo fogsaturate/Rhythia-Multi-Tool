@@ -9,4 +9,4 @@ rhym_map_path = os.path.join(rhym_path, "Haxagon_iyowa_Kyu-kurarin_(7_7_bootleg)
 
 
 rhym_test_map = Parser.RhymDecoder(rhym_map_path)
-print(rhym_test_map.difficulty_objectdata)
+print(rhym_test_map.difficulty_metadata)

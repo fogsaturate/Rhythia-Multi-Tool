@@ -4,7 +4,9 @@ class VulnusParser:
         self._version: int = 0
         self._artist: str = "Unknown Artist"
         self._title: str = "Unknown Title"
-        self._mappers: str = ["Unknown Mapper"]
-        self._difficulties: str = ["official.json"] # auto converted maps are called official
-        self._music: str = ["audio.mp3"]
-    
+        self._mappers: list = ["Unknown Mapper"]
+        self._difficulties: list = ["official.json"] # auto converted maps are called official
+        self._music: list = ["audio.mp3"]
+
+    def VulnusDecoder(self):
+        pass

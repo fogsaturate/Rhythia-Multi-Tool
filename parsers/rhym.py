@@ -21,9 +21,11 @@ class RhymParser:
 
         self.version = global_meta_data['version']
         self.artist = global_meta_data['artist']
-        self.romanized_artist = global_meta_data['romanizedArtist']
+        if "romanizedArtist" in global_meta_data:
+            self.romanized_artist = global_meta_data['romanizedArtist']
         self.title = global_meta_data['title']
-        self.title = global_meta_data['romanizedTitle']
+        if "romanizedTitle" in global_meta_data:
+            self.title = global_meta_data['romanizedTitle']
 
         difficulty = global_meta_data['difficulties']
 
