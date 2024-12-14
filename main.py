@@ -29,9 +29,7 @@ vulnus_map_cover_path = os.path.join(vulnus_map_path, "cover.png")
 
 vulnus_map_difficulty_data = []
 current_difficulty_name = []
-
 real_vulnus_difficulty_names = []
-
 for i in vulnus_map.difficulty_data:
     vulnus_difficulty_data = {
         "difficulty_name": i["difficulty_name"],
@@ -42,10 +40,6 @@ for i in vulnus_map.difficulty_data:
     }
     vulnus_map_difficulty_data.append(vulnus_difficulty_data)
     real_vulnus_difficulty_names.append(vulnus_difficulty_data["difficulty_name"])
-
-print(vulnus_map_music_path)
-print(vulnus_map_cover_path)
-print(real_vulnus_difficulty_names)
 
 RhymParser.RhymEncoder(
     vulnus_map.version,
