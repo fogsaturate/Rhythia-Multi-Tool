@@ -18,7 +18,7 @@ vulnus_map_path = os.path.join(vulnus_path, "Multipole Expansion")
 
 sspm_path = os.path.join(main_path, "Test Maps", "sspm")
 sspm_v2_path = os.path.join(sspm_path, "v2")
-sspm_v2_map_path = os.path.join(sspm_v2_path, "xr_attractor_dimension.sspm")
+sspm_v2_map_path = os.path.join(sspm_v2_path, "haxagon_-_iyowa_-_kyu-kurarin_7_7_bootleg.sspm")
 # lmfao
 
 
@@ -28,7 +28,7 @@ sspm_v2_map = SSPMParser.SSPMDecoder(sspm_v2_map_path)
 
 print(sspm_v2_map.header)
 print(sspm_v2_map.version)
-print(sspm_v2_map.custom_data)
+print(sspm_v2_map.note_list)
 
 vulnus_map_music_path = os.path.join(vulnus_map_path, vulnus_map.audio_filename)
 vulnus_map_cover_path = os.path.join(vulnus_map_path, "cover.png")
