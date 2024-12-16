@@ -56,5 +56,23 @@ class VulnusParser:
 
         return self
 
-    def VulnusEncoder(self):
+    def VulnusEncoder(
+        self,
+        artist: str,
+        title: str,
+        difficulties: list,
+        mappers: list,
+        difficulty_data: list,
+        # formatted in a dictionary
+        # [{
+        #   'difficulty_name': 'example',
+        #   'approach_distance': 50,
+        #   'approach_time': 1,
+        #   'note_list': [{'x': 0, 'y': 1, 'time': 100},{'x': 1, 'y': -1, 'time': 200}],
+        # }]
+        output_path: str,
+        export_as_vul=False, # EXTREMELY DEPRECATED. NEVER USE EVER.
+        music_path: str = None,
+        cover_path: str = None
+    ):
         pass

@@ -115,8 +115,8 @@ class RhymParser:
         export_as_rhym = False, # optional, export as a .rhym zip (for sharing purposes)
         romanized_artist = None, # optional
         romanized_title = None, # optional
-        music_path = None, # optional but highly recommended
-        cover_path = None # also optional
+        music_path: str = None, # optional but highly recommended
+        cover_path: str = None # also optional
     ):
 
         mappersarray = []
@@ -227,7 +227,7 @@ class RhymParser:
                 Very cool
                 """
 
-        if export_as_rhym == True:
+        if export_as_rhym:
             rhym_file_name = f"{map_output_id}.rhym"
             rhym_output_path = os.path.join(output_path, rhym_file_name)
             with zipfile.ZipFile(rhym_output_path, 'w') as zip_stream:
