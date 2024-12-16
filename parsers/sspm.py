@@ -27,8 +27,8 @@ class Difficulty(Enum):
 
 class SSPMParser:
     def __init__(self):
+        self.header: str = ""
         self.version: int = 0
-        self.note_count: int = 0
 
         self.last_ms: int = 0
         self.total_note_count: int = 0
@@ -40,6 +40,31 @@ class SSPMParser:
         self.audio_exists: int = 0
         self.cover_exists: int = 0
         self.mod_chart_exists: int = 0
+
+        self.custom_data_offset: int = 0
+        self.custom_data_length: int = 0
+        self.audio_data_offset: int = 0
+        self.audio_data_length: int = 0
+        self.cover_data_offset: int = 0
+        self.cover_data_length: int = 0
+        self.marker_definition_offset: int = 0
+        self.marker_definition_length: int = 0
+        self.marker_section_offset: int = 0
+        self.marker_section_length: int = 0
+
+        self.map_id: str = ""
+        self.map_name: str = ""
+        self.song_name: str = ""
+        self.mappers: list = []
+
+        self.custom_data: list = [] # this is where difficulty names would go
+
+        self.audio_data = None
+        self.cover_data = None
+
+        self.marker_definitions: list = []
+
+        self.markers: list = []
 
     def data_types(self, file: BinaryIO, data_type: int):
         binary_reader = BinaryReader(file)
@@ -72,14 +97,12 @@ class SSPMParser:
                 buffer_length = binary_reader.read_uint16()
                 return file.read(buffer_length)
             case 9: # short string
-                string_length = binary_reader.read_uint16()
-                return binary_reader.get_string_buffer(string_length)
+                return binary_reader.read_string_buffer(2)
             case 10: # long buffer
                 long_buffer_length = binary_reader.read_uint32()
                 return file.read(long_buffer_length)
             case 11: # long string
-                long_string_length = binary_reader.read_uint32()
-                return binary_reader.get_string_buffer(long_string_length)
+                return binary_reader.read_string_buffer(4)
             case 12: # array
                 data_type_array = []
 
@@ -94,13 +117,21 @@ class SSPMParser:
 
 
     def SSPMDecoder(self, sspm_map: str):
-        with open(sspm_map, "rb") as file:
-            binary_reader = BinaryReader(file)
+        try:
+            with open(sspm_map, "rb") as file:
+                binary_reader = BinaryReader(file)
 
-            header = file.read(4)
-            self.version = binary_reader.read_uint8()
-            if self.version == 2:
-                self.SSPMv2(file)
+                self.header = file.read(4).decode('utf-8')
+                if self.header != "SS+m":
+                    raise ValueError(f"Invalid Header: {self.header}")
+
+                self.version = binary_reader.read_uint16()
+                if self.version == 2:
+                    self.SSPMv2(file)
+                else:
+                    raise ValueError(f"Unsupported Version! This SSPM file is v{self.version}")
+        except:
+            raise ValueError("Invalid file! Make sure it is a proper SSPM file.")
 
         return self
 
@@ -111,19 +142,62 @@ class SSPMParser:
     def SSPMv2(self, file: BinaryIO):
         binary_reader = BinaryReader(file)
 
-        file.read(4) # reserved space
-        file.read(20) # hash
-
+        file.read(4)
+        file.read(20) # reserved space
+        # --- Parsing Metadata ---
         self.last_ms = binary_reader.read_uint32()
         self.total_note_count = binary_reader.read_uint32()
         self.total_marker_count = binary_reader.read_uint32()
 
         self.difficulty = binary_reader.read_uint8()
 
-        self.star_rating = binary_reader.read_uint16()
+        self.star_rating = binary_reader.read_uint16() # Never Used
 
         self.audio_exists = binary_reader.read_uint8()
         self.cover_exists = binary_reader.read_uint8()
         self.mod_chart_exists = binary_reader.read_uint8()
+
+        # --- Pointers ---
+        self.custom_data_offset = binary_reader.read_uint64()
+        self.custom_data_length = binary_reader.read_uint64()
+        self.audio_data_offset = binary_reader.read_uint64()
+        self.audio_data_length = binary_reader.read_uint64()
+        self.cover_data_offset = binary_reader.read_uint64()
+        self.cover_data_length = binary_reader.read_uint64()
+        self.marker_definition_offset = binary_reader.read_uint64()
+        self.marker_definition_length = binary_reader.read_uint64()
+        self.marker_section_offset = binary_reader.read_uint64()
+        self.marker_section_length = binary_reader.read_uint64()
+
+        # --- Song Metadata ---
+        self.map_id = binary_reader.read_string_buffer(2)
+        self.map_name = binary_reader.read_string_buffer(2)
+        self.song_name = binary_reader.read_string_buffer(2)
+
+        mapper_count = binary_reader.read_uint16()
+        for i in range(mapper_count): # for every mapper in mapper_count,
+            self.mappers.append(binary_reader.read_string_buffer(2))
+
+        # --- Custom Data --- (this is going to be long)
+        custom_data_object_count = binary_reader.read_uint16()
+
+        custom_data_dict = {
+            "custom_data_object_count": custom_data_object_count,
+            "custom_data": []
+        }
+        for i in range(custom_data_object_count):
+            custom_data_field_indicator = binary_reader.read_string_buffer(2) # usually going to be difficulty_name
+            custom_data_object_data_type = binary_reader.read_uint8()
+            custom_data_object_value = self.data_types(file, custom_data_object_data_type)
+
+            custom_data_object = {
+                "field_indicator": custom_data_field_indicator,
+                "data_type": custom_data_object_data_type,
+                "value": custom_data_object_value
+            }
+            custom_data_dict["custom_data"].append(custom_data_object)
+
+        self.custom_data = custom_data_dict
+
 
         return self

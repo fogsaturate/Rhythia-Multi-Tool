@@ -38,7 +38,7 @@ class BinaryReader:
         bytes_data = self.file.read(8)
         return struct.unpack('<d', bytes_data)[0]
 
-    def get_string_buffer(self, length) -> str:
+    def read_string_buffer(self, length) -> str:
         string_length_bytes = self.file.read(length)
         string_length = int.from_bytes(string_length_bytes, byteorder='little', signed=False)
         string_bytes = self.file.read(string_length)
